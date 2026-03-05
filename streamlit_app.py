@@ -11,7 +11,11 @@ if excel_file:
   for i in range(len(class_list)):
     class_dict[class_list[i]]=i
   from random import choice
-  if st.button('Start!'):
+
+  with st.form("start_form"):
+    st.write("演算を開始しますか？")
+    start = st.form_submit_button("Start!")
+  if start:
     class_number=class_dict[your_class]
     class_data=df.iloc[class_number]
     n=class_data['人数']
