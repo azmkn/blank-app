@@ -1,5 +1,4 @@
 import streamlit as st
-
 import pandas as pd
 
 excel_file=st.file_uploader("Excelファイルを選択してください",type=['xlsx'])
