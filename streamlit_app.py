@@ -123,6 +123,3 @@ if "phase" in st.session_state and st.session_state.phase == "game":
         st.markdown(f"### プレイヤー {player}")
         st.markdown(f"役職: **{role}**")
         st.markdown(f"陣営: :{color}[{team}]")
-    
-    if st.button('OK'):
-        aihb=0
