@@ -33,12 +33,12 @@ if st.button("🎮 Start Game"):
 
     roles = []
 
-    roles += [werewolf] * number_werewolf
+    roles += ['人狼 , '+werewolf] * number_werewolf
     roles += ["占い師"] * number_fortune
     roles += ["騎士"] * number_knight
 
     while len(roles) < number:
-        roles.append(simin)
+        roles.append('市民 , '+simin)
 
     shuffle(roles)
 
@@ -72,7 +72,7 @@ if "phase" in st.session_state and st.session_state.phase == "confirm":
             role = roles[p]
 
             # 陣営判定
-            if role == werewolf:
+            if role[0] == '人':
                 team = "🐺 人狼陣営"
                 color = "red"
             elif role in ["占い師","騎士"]:
@@ -99,21 +99,18 @@ if "phase" in st.session_state and st.session_state.phase == "confirm":
 # ===== ゲーム用役職確認 =====
 
 if "phase" in st.session_state and st.session_state.phase == "game":
-
+    st.header('全員の確認が終了しました')
     st.header("ゲーム中 役職確認")
 
     roles = st.session_state.roles
 
-    player = st.selectbox(
-        "プレイヤーを選択",
-        list(range(1, len(roles)+1))
-    )
+    player = st.number_input("プレイヤーを選択",1)
 
     if st.button("役職確認"):
 
         role = roles[player-1]
 
-        if role == werewolf:
+        if role[0] == '人':
             team = "🐺 人狼陣営"
             color = "red"
         elif role in ["占い師","騎士"]:
@@ -126,3 +123,6 @@ if "phase" in st.session_state and st.session_state.phase == "game":
         st.markdown(f"### プレイヤー {player}")
         st.markdown(f"役職: **{role}**")
         st.markdown(f"陣営: :{color}[{team}]")
+    
+    if st.button('OK'):
+        aihb=0
