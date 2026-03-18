@@ -1,125 +1,55 @@
 import streamlit as st
-from random import choice, shuffle
+import pandas as pd
 
-st.set_page_config(page_title="気候人狼", page_icon="🐺", layout="centered")
+excel_file=st.file_uploader("Excelファイルを選択してください",type=['xlsx'])
+if excel_file:
+  df=pd.read_excel(excel_file)
+  class_list=df['学級']
+  your_class=st.selectbox('クラスを選択してください',class_list)
+  class_dict={}
+  for i in range(len(class_list)):
+    class_dict[class_list[i]]=i
+  from random import choice
 
-st.title("🐺 気候人狼")
-
-# 気候設定
-s = choice(["A","B","C","D","E"])
-d = {
-"A":["Af","Am","Aw"],
-"B":["BW","BS"],
-"C":["Cfa","Cfb","Cs","Cw"],
-"D":["Dw","Df"],
-"E":["ET","EF"]
-}
-
-li = d[s]
-
-simin = choice(li)
-li.remove(simin)
-werewolf = choice(li)
-
-st.subheader("人数設定")
-
-number = st.number_input("全体人数",0,step=1)
-number_werewolf = st.number_input("人狼人数",0,step=1)
-number_fortune = st.number_input("占い師人数",0,step=1)
-number_knight = st.number_input("騎士人数",0,step=1)
-
-# ゲーム開始
-if st.button("🎮 Start Game"):
-
-    roles = []
-
-    roles += ['人狼 , '+werewolf] * number_werewolf
-    roles += ["占い師"] * number_fortune
-    roles += ["騎士"] * number_knight
-
-    while len(roles) < number:
-        roles.append('市民 , '+simin)
-
-    shuffle(roles)
-
-    st.session_state.roles = roles
-    st.session_state.player = 0
-    st.session_state.show = False
-    st.session_state.phase = "confirm"
-
-
-# ===== 役職確認フェーズ =====
-
-if "phase" in st.session_state and st.session_state.phase == "confirm":
-
-    roles = st.session_state.roles
-    p = st.session_state.player
-
-    if p < len(roles):
-
-        st.header(f"プレイヤー {p+1}")
-
-        if not st.session_state.show:
-
-            st.info("自分の番の人だけ画面を見てください")
-
-            if st.button("役職を見る 👀"):
-                st.session_state.show = True
-                st.rerun()
-
-        else:
-
-            role = roles[p]
-
-            # 陣営判定
-            if role[0] == '人':
-                team = "🐺 人狼陣営"
-                color = "red"
-            elif role in ["占い師","騎士"]:
-                team = "👥 市民陣営"
-                color = "green"
-            else:
-                team = "👥 市民陣営"
-                color = "blue"
-
-            st.markdown(f"### 役職: **{role}**")
-            st.markdown(f"**陣営:** :{color}[{team}]")
-
-            if st.button("▶ 次の人へ"):
-                st.session_state.player += 1
-                st.session_state.show = False
-                st.rerun()
-
-    else:
-        st.success("全員の確認が終わりました")
-        st.session_state.phase = "game"
-        st.rerun()
-
-
-# ===== ゲーム用役職確認 =====
-
-if "phase" in st.session_state and st.session_state.phase == "game":
-    st.header('全員の確認が終了しました')
-    st.header("ゲーム中 役職確認")
-
-    roles = st.session_state.roles
-
-    player = st.number_input("プレイヤーを選択",1)
-
-    if st.button("役職確認"):
-
-        role = roles[player-1]
-
-        if role[0] == '人':
-            team = "🐺 人狼陣営"
-            color = "red"
-        elif role in ["占い師","騎士"]:
-            team = "👥 市民陣営"
-            color = "green"
-        else:
-            team = "👥 市民陣営"
-            color = "blue"
-
-        st.markdown(f"### プレイヤー {player}")
-        st.markdown(f"役職: **{role}**")
-        st.markdown(f"陣営: :{color}[{team}]")
+  if st.button("Start!"):
+    class_number=class_dict[your_class]
+    class_data=df.iloc[class_number]
+    n=class_data['人数']
+    attendance_number_start=class_data['最初の出席番号']
+    h,w=class_data['縦の長さ'],class_data['横の長さ']
+    g=class_data['席'].split()
+    grid=[]
+    for i in g:
+      grid.append(list(i))
+    l = [i for i in range(1, n+1)]
+    name = class_data['名前(出席番号順)'].split()
+    max_name_length=max([len(i)for i in name])
+    for i in range(len(name)):
+      if i+attendance_number_start<=9:p=str(i+attendance_number_start)+" "
+      else:p=str(i+attendance_number_start)
+      name[i]=p+"."+name[i]+"  "*(max_name_length-len(name[i]))
+    fix_number=class_data['固定人数']
+    if fix_number!=0:
+      fix_data=list(map(int,class_data['固定者の番号、位置'].split()))
+    for i in range(fix_number):
+      grid[fix_data[3*i+1]-1][fix_data[3*i+2]-1]=name[fix_data[3*i]-attendance_number_start]
+      l.remove(fix_data[3*i]-attendance_number_start+1)
+    tf=True
+    for i in range(0,h):
+      for j in range(0,w):
+        if grid[i][j]=="x":
+          grid[i][j]="   "+"  "*max_name_length
+          continue
+        if grid[i][j]=="o":
+          c=choice(l)
+          grid[i][j]=name[c - 1]
+          l.remove(c)
+    st.text("")
+    data={}
+    for i in range(w):
+      newl=[]
+      for j in range(h):
+        newl.append(grid[j][i])
+      data[i]=newl
+    df_seat=pd.DataFrame(data)
+    st.markdown(df_seat.to_html(index=False, header=False), unsafe_allow_html=True)
