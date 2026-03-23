@@ -8,7 +8,10 @@ while n%2==0:
 while n%5==0:
   n//=5
 if n==1:
-  st.text(str(or_n)+":"+str(exp))
+  if st.button("表示"):
+    st.text(str(or_n)+"   :   "+str(exp))
+    st.text("(1/or_n)={:.100f}")
+    exit()
 while True:
   b*=10
   exp+=1
