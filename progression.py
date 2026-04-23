@@ -31,4 +31,3 @@ if excel_file:
     with col3:
         if st.button("x"):
             st.session_state.choice = "x"
-    st.text(st.session_state.choice)
